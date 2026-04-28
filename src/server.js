@@ -13,7 +13,7 @@ const startServer = async () => {
             throw error;
         });
 
-        const server = app.listen(config.PORT, () => {
+        const server = app.listen(env.PORT, () => {
             logger.info(`Server is running at port : ${env.PORT}`);
         });
 
