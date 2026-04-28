@@ -8,6 +8,8 @@ import { ApiResponse } from "./utils/ApiResponse.js";
 
 // Routes imports
 import authRouter from "./routes/auth.routes.js";
+import friendRequestRouter from "./routes/friendRequest.routes.js";
+
 
 const app = express();
 
@@ -36,6 +38,8 @@ app.get("/api/v1/health", (req, res) => {
 
 // Routes declaration
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/friends", friendRequestRouter);
+
 
 // Error handling middleware (must be last)
 
