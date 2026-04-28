@@ -6,7 +6,11 @@ import env from "./config/env.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 import { ApiResponse } from "./utils/ApiResponse.js";
 
+// Routes imports
+import authRouter from "./routes/auth.routes.js";
+
 const app = express();
+
 
 // Security Middleware
 app.use(helmet());
@@ -30,7 +34,11 @@ app.get("/api/v1/health", (req, res) => {
     );
 });
 
+// Routes declaration
+app.use("/api/v1/auth", authRouter);
+
 // Error handling middleware (must be last)
+
 app.use(errorHandler);
 
 export { app };

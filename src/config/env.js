@@ -36,9 +36,14 @@ const envSchema = Joi.object({
         .description('JWT refresh token expiry'),
 
     CORS_ORIGIN: Joi.string()
-        .default('http://localhost:5173')
-        .description('Allowed CORS origin'),
-}).unknown(); // allow other env vars to exist
+        .default("http://localhost:5173")
+        .description("Allowed CORS origin"),
+
+    CLOUDINARY_CLOUD_NAME: Joi.string().required(),
+    CLOUDINARY_API_KEY: Joi.string().required(),
+    CLOUDINARY_API_SECRET: Joi.string().required(),
+}).unknown();
+
 
 const { error, value: envVars } = envSchema.validate(process.env, {
     abortEarly: false,
@@ -59,7 +64,11 @@ const env = {
     JWT_ACCESS_EXPIRY: envVars.JWT_ACCESS_EXPIRY,
     JWT_REFRESH_EXPIRY: envVars.JWT_REFRESH_EXPIRY,
     CORS_ORIGIN: envVars.CORS_ORIGIN,
-    isDev: envVars.NODE_ENV === 'development',
+    CLOUDINARY_CLOUD_NAME: envVars.CLOUDINARY_CLOUD_NAME,
+    CLOUDINARY_API_KEY: envVars.CLOUDINARY_API_KEY,
+    CLOUDINARY_API_SECRET: envVars.CLOUDINARY_API_SECRET,
+    isDev: envVars.NODE_ENV === "development",
+
     isProd: envVars.NODE_ENV === 'production',
     isTest: envVars.NODE_ENV === 'test',
 };
