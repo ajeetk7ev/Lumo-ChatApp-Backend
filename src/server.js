@@ -1,8 +1,11 @@
 import mongoose from "mongoose";
+import { createServer } from "http";
 import connectDB from "./config/db.js";
 import { app } from "./app.js";
 import env from "./config/env.js";
 import logger from "./config/logger.js";
+import { initializeSocket } from "./socket/index.js";
+
 
 const startServer = async () => {
     try {
@@ -13,9 +16,13 @@ const startServer = async () => {
             throw error;
         });
 
-        const server = app.listen(env.PORT, () => {
+        const httpServer = createServer(app);
+        initializeSocket(httpServer);
+
+        const server = httpServer.listen(env.PORT, () => {
             logger.info(`Server is running at port : ${env.PORT}`);
         });
+
 
         const shutdown = () => {
             logger.info("Closing HTTP server...");
