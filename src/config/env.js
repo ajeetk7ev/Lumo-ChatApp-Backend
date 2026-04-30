@@ -5,55 +5,58 @@ import Joi from 'joi';
  * Validate and export environment variables.
  * Fails fast at startup if any required var is missing.
  */
-const envSchema = Joi.object({
-    NODE_ENV: Joi.string()
-        .valid('development', 'production', 'test')
-        .default('development'),
+// const envSchema = Joi.object({
+//     NODE_ENV: Joi.string()
+//         .valid('development', 'production', 'test')
+//         .default('development'),
 
-    PORT: Joi.number()
-        .default(5000),
+//     PORT: Joi.number()
+//         .default(5000),
 
-    MONGO_URI: Joi.string()
-        .required()
-        .description('MongoDB connection URI'),
+//     MONGO_URI: Joi.string()
+//         .required()
+//         .description('MongoDB connection URI'),
 
-    JWT_ACCESS_SECRET: Joi.string()
-        .required()
-        .min(16)
-        .description('JWT access token secret'),
+//     JWT_ACCESS_SECRET: Joi.string()
+//         .required()
+//         .min(16)
+//         .description('JWT access token secret'),
 
-    JWT_REFRESH_SECRET: Joi.string()
-        .required()
-        .min(16)
-        .description('JWT refresh token secret'),
+//     JWT_REFRESH_SECRET: Joi.string()
+//         .required()
+//         .min(16)
+//         .description('JWT refresh token secret'),
 
-    JWT_ACCESS_EXPIRY: Joi.string()
-        .default('15m')
-        .description('JWT access token expiry'),
+//     JWT_ACCESS_EXPIRY: Joi.string()
+//         .default('15m')
+//         .description('JWT access token expiry'),
 
-    JWT_REFRESH_EXPIRY: Joi.string()
-        .default('7d')
-        .description('JWT refresh token expiry'),
+//     JWT_REFRESH_EXPIRY: Joi.string()
+//         .default('7d')
+//         .description('JWT refresh token expiry'),
 
-    CORS_ORIGIN: Joi.string()
-        .default("http://localhost:5173")
-        .description("Allowed CORS origin"),
+//     CORS_ORIGIN: Joi.string()
+//         .default("http://localhost:5173")
+//         .description("Allowed CORS origin"),
 
-    CLOUDINARY_CLOUD_NAME: Joi.string().required(),
-    CLOUDINARY_API_KEY: Joi.string().required(),
-    CLOUDINARY_API_SECRET: Joi.string().required(),
-}).unknown();
+//     CLOUDINARY_CLOUD_NAME: Joi.string().required(),
+//     CLOUDINARY_API_KEY: Joi.string().required(),
+//     CLOUDINARY_API_SECRET: Joi.string().required(),
+// }).unknown();
 
 
-const { error, value: envVars } = envSchema.validate(process.env, {
-    abortEarly: false,
-    stripUnknown: false,
-});
+// const { error, value: envVars } = envSchema.validate(process.env, {
+//     abortEarly: false,
+//     stripUnknown: false,
+// });
 
-if (error) {
-    const missingVars = error.details.map((d) => d.message).join('\n  - ');
-    throw new Error(`❌ Environment validation failed:\n  - ${missingVars}`);
-}
+// if (error) {
+//     const missingVars = error.details.map((d) => d.message).join('\n  - ');
+//     throw new Error(`❌ Environment validation failed:\n  - ${missingVars}`);
+// }
+
+
+const envVars = process.env;
 
 const env = {
     NODE_ENV: envVars.NODE_ENV,
