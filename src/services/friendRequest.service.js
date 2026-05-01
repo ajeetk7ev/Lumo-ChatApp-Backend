@@ -122,6 +122,49 @@ class FriendRequestService {
                 : f.sender;
         });
     }
+
+    /**
+     * Search users by username or fullName
+     */
+    static async searchUsers(query, currentUserId) {
+        if (!query) return [];
+
+        const users = await User.find({
+            $and: [
+                {
+                    $or: [
+                        { username: { $regex: query, $options: "i" } },
+                        { fullName: { $regex: query, $options: "i" } },
+                    ],
+                },
+                { _id: { $ne: currentUserId } },
+            ],
+        }).select("username fullName avatar").limit(20);
+
+        const userIds = users.map(u => u._id);
+
+        const requests = await FriendRequest.find({
+            $or: [
+                { sender: currentUserId, receiver: { $in: userIds } },
+                { sender: { $in: userIds }, receiver: currentUserId }
+            ]
+        });
+
+        const usersWithStatus = users.map(user => {
+            const request = requests.find(r => 
+                (r.sender.toString() === currentUserId.toString() && r.receiver.toString() === user._id.toString()) ||
+                (r.sender.toString() === user._id.toString() && r.receiver.toString() === currentUserId.toString())
+            );
+
+            return {
+                ...user.toObject(),
+                friendshipStatus: request ? request.status : "none",
+                isSender: request ? request.sender.toString() === currentUserId.toString() : false
+            };
+        });
+
+        return usersWithStatus;
+    }
 }
 
 export { FriendRequestService };

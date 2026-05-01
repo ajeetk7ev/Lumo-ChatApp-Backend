@@ -26,5 +26,6 @@ router.route("/reject/:requestId").post(
 
 router.route("/pending").get(FriendRequestController.getPendingRequests);
 router.route("/friends").get(FriendRequestController.getFriends);
+router.route("/search").get(FriendRequestController.searchUsers);
 
 export default router;
