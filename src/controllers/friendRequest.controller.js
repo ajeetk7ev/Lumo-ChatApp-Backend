@@ -47,11 +47,11 @@ class FriendRequestController {
     });
 
     static searchUsers = asyncHandler(async (req, res) => {
-        const { query } = req.query;
-        const users = await FriendRequestService.searchUsers(query, req.user._id);
+        const { query, page, limit } = req.query;
+        const result = await FriendRequestService.searchUsers(query, req.user._id, page, limit);
 
         return res.status(200).json(
-            new ApiResponse(200, users, "Users searched successfully")
+            new ApiResponse(200, result, "Users searched successfully")
         );
     });
 }

@@ -1,6 +1,7 @@
 import { FriendRequest } from "../models/friendRequest.model.js";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
+import { emitEvent } from "../socket/index.js";
 
 class FriendRequestService {
     /**
@@ -48,6 +49,10 @@ class FriendRequestService {
             status: "pending",
         });
 
+        // Emit real-time notification to receiver
+        const populatedRequest = await FriendRequest.findById(newRequest._id).populate("sender", "username fullName avatar");
+        emitEvent(receiverId.toString(), "friend:request_received", populatedRequest);
+
         return newRequest;
     }
 
@@ -73,7 +78,26 @@ class FriendRequestService {
         request.status = "accepted";
         await request.save();
 
-        return request;
+        // Populate to get friend details
+        const populatedRequest = await FriendRequest.findById(request._id).populate("sender receiver", "username fullName avatar");
+        
+        const friend = populatedRequest.sender._id.toString() === userId.toString() 
+            ? populatedRequest.receiver 
+            : populatedRequest.sender;
+
+        // Emit to the sender that their request was accepted
+        emitEvent(populatedRequest.sender._id.toString(), "friend:request_accepted", {
+            request: populatedRequest,
+            friend: populatedRequest.receiver // If sender is the one who sent, receiver is the friend
+        });
+
+        // Emit to the receiver (current user) as well (for other devices)
+        emitEvent(populatedRequest.receiver._id.toString(), "friend:request_accepted", {
+            request: populatedRequest,
+            friend: populatedRequest.sender // If receiver is the one who accepted, sender is the friend
+        });
+
+        return { request: populatedRequest, friend };
     }
 
     /**
@@ -124,22 +148,32 @@ class FriendRequestService {
     }
 
     /**
-     * Search users by username or fullName
+     * Search users by username or fullName with pagination
      */
-    static async searchUsers(query, currentUserId) {
-        if (!query) return [];
+    static async searchUsers(query, currentUserId, page = 1, limit = 20) {
+        const skip = (page - 1) * limit;
+        
+        let filter = { _id: { $ne: currentUserId } };
+        
+        if (query) {
+            filter = {
+                $and: [
+                    filter,
+                    {
+                        $or: [
+                            { username: { $regex: query, $options: "i" } },
+                            { fullName: { $regex: query, $options: "i" } },
+                        ],
+                    },
+                ],
+            };
+        }
 
-        const users = await User.find({
-            $and: [
-                {
-                    $or: [
-                        { username: { $regex: query, $options: "i" } },
-                        { fullName: { $regex: query, $options: "i" } },
-                    ],
-                },
-                { _id: { $ne: currentUserId } },
-            ],
-        }).select("username fullName avatar").limit(20);
+        const totalUsers = await User.countDocuments(filter);
+        const users = await User.find(filter)
+            .select("username fullName avatar")
+            .skip(skip)
+            .limit(limit);
 
         const userIds = users.map(u => u._id);
 
@@ -163,7 +197,15 @@ class FriendRequestService {
             };
         });
 
-        return usersWithStatus;
+        return {
+            users: usersWithStatus,
+            pagination: {
+                total: totalUsers,
+                page: Number(page),
+                limit: Number(limit),
+                hasNextPage: totalUsers > skip + users.length
+            }
+        };
     }
 }
 

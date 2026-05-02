@@ -20,7 +20,10 @@ export const initializeSocket = (server) => {
     // Authentication Middleware for Socket.IO
     io.use(async (socket, next) => {
         try {
-            const token = socket.handshake.auth?.token || socket.handshake.headers?.token;
+            const token = 
+                socket.handshake.auth?.token || 
+                socket.handshake.headers?.token ||
+                socket.handshake.headers?.cookie?.split('; ').find(row => row.startsWith('accessToken='))?.split('=')[1];
 
             if (!token) {
                 return next(new Error("Authentication error: No token provided"));
