@@ -36,7 +36,7 @@ class MessageService {
         const populatedMessage = await message.populate("sender", "username fullName avatar");
 
         // 4. Emit to socket room
-        emitEvent(conversationId.toString(), "message:receive", populatedMessage);
+        emitEvent(conversationId.toString(), "chat:message", populatedMessage);
 
         return populatedMessage;
     }
@@ -96,7 +96,7 @@ class MessageService {
         );
 
         // 3. Notify the other user(s)
-        emitEvent(conversationId.toString(), "message:seen", {
+        emitEvent(conversationId.toString(), "chat:seen", {
             conversationId,
             seenBy: userId,
         });
